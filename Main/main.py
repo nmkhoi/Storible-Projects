@@ -196,5 +196,3 @@ def main():
     root.mainloop()
     
 if __name__ == "__main__": main()
-
-"until:2020-12-31 since:2010-01-01"
