@@ -36,7 +36,50 @@ def scrolling():
     # Calculate new scroll height and compare with last scroll height
     new_height = driver.execute_script("return document.body.scrollHeight")
 
-def scrape_tweet(query, no_of_tweets, filename, email, password, username):
+def scrape_google_new(query,no_of_records):
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    driver.set_page_load_timeout(20)
+
+    driver.get('https://www.google.com.vn/')
+    time.sleep(5)
+    
+    search = driver.find_elements(by=By.TAG_NAME, value='textarea')[0]
+    search.send_keys(str(query))
+    search.submit()
+    time.sleep(5)
+
+    nav = [div for div in driver.find_elements(by=By.TAG_NAME, value='div') if div.get_attribute('role') == 'navigation'][1]
+    try:
+        nav.find_element(by=By.LINK_TEXT, value='News')
+    except Exception as e:
+        nav.find_element(by=By.LINK_TEXT, value='Tin tức')
+    time.sleep(5)
+
+    final_data = pd.DataFrame(columns=['headline','link'])
+    try:
+        for i in range(1,no_of_records):
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(3)
+            table = driver.find_element(by=By.TAG_NAME, value='table')
+            page = table.find_elements(by=By.TAG_NAME, value='td')
+            page[i].click()
+            time.sleep(3)
+
+            links = driver.find_elements(by=By.CLASS_NAME, value='SoaBEf')
+            for link in links:
+                url = link.find_elements(by=By.TAG_NAME, value='a')[0].get_attribute('href')
+                headline = link.find_elements(by=By.TAG_NAME, value='div')[1].text.split('\n')[1].title()
+
+                final_data = pd.concat([final_data, pd.DataFrame.from_records([{
+                    'headline':headline,
+                    'link':url
+                    }])])
+    except Exception as e:
+        pass
+    return final_data
+
+def scrape_tweet(query, no_of_tweets, email, password, username):
 
     global driver
 
@@ -120,7 +163,7 @@ def scrape_tweet(query, no_of_tweets, filename, email, password, username):
     driver.quit()
     return final_data.head(no_of_tweets)
 
-class Feedback:
+class Twitter_Window:
 
     def __init__(self, master):
         
@@ -188,11 +231,111 @@ class Feedback:
         self.entry_records.delete(0, 'end')
         self.entry_filename.delete(0, 'end')
         self.text_query.delete(1.0, 'end')
+        self.entry_email.delete(0, 'end')
+        self.entry_password.delete(0, 'end')
+        self.entry_username.delete(0, 'end')
+
+class Google_Window:
+
+    def __init__(self, master):
+
+        # keep `root` in `self.master`
+        
+        master.title('Scrapper')
+        master.resizable(False, False)
+        master.configure(background = '#e1d8b9')
+        
+        self.style = ttk.Style()
+        self.style.configure('TFrame', background = '#e1d8b9')
+        self.style.configure('TButton', background = '#e1d8b9')
+        self.style.configure('TLabel', background = '#e1d8b9', font = ('Arial', 11))
+        self.style.configure('Header.TLabel', font = ('Arial', 18, 'bold'))      
+
+        self.frame_header = ttk.Frame(master)
+        self.frame_header.pack()
+        
+        self.logo = PhotoImage(file = 'logo.png',master=master)
+        ttk.Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
+        ttk.Label(self.frame_header, text = 'Social Media Scrapping', style = 'Header.TLabel').grid(row = 0, column = 1)
+        ttk.Label(self.frame_header, wraplength = 300,
+                  text = ("Chỗ này sẽ note cái dì đó (User Manual chẳng hạn)")).grid(row = 1, column = 1)
+        
+        self.frame_content = ttk.Frame(master)
+        self.frame_content.pack()
+
+        ttk.Label(self.frame_content, text = 'Number of Pages:').grid(row = 0, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'File Name:').grid(row = 0, column = 1, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Query:').grid(row = 2, column = 0, padx = 5, sticky = 'sw')
+        
+        self.entry_records = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.entry_filename = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.text_query = Text(self.frame_content, width = 50, height = 15, font = ('Arial', 10))
+        
+        self.entry_records.grid(row = 1, column = 0, padx = 5)
+        self.entry_filename.grid(row = 1, column = 1, padx = 5)
+        self.text_query.grid(row = 3, column = 0, columnspan = 2, padx = 5)
+        
+        ttk.Button(self.frame_content, text = 'Submit',
+                   command = self.submit).grid(row = 4, column = 0, padx = 5, pady = 5, sticky = 'e')
+        ttk.Button(self.frame_content, text = 'Clear',
+                   command = self.clear).grid(row = 4, column = 1, padx = 5, pady = 5, sticky = 'w')
+
+    def submit(self):
+        no_of_records = int(self.entry_records.get())
+        filename = self.entry_filename.get()
+        query = self.text_query.get(1.0,'end')
+        self.clear()
+        df = scrape_google_new(query=query, no_of_records=no_of_records)
+        df.to_excel('{}.xlsx'.format(filename))
+        # messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
+    
+    def clear(self):
+        self.entry_records.delete(0, 'end')
+        self.entry_filename.delete(0, 'end')
+        self.text_query.delete(1.0, 'end')
+
+class Option_Window:
+
+    def __init__(self, master):
+
+        # keep `root` in `self.master`
+        self.master = master
+
+        self.frame_header = Frame(master)
+        self.frame_header.pack()
+
+        self.logo = PhotoImage(file = 'logo.png',master=master)
+        Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
+        Label(self.frame_header, text = 'Social Media Scrapping').grid(row = 0, column = 1)
+        Label(self.frame_header, wraplength = 300,
+                  text = ("Chỗ này sẽ note cái dì đó (User Manual chẳng hạn)")).grid(row = 1, column = 1)
+
+        self.button1 = Button(self.master, text="Twitter", command=self.load_twitter)
+        self.button1.pack(side=LEFT)
+
+        self.button2 = Button(self.master, text="Google News", command=self.load_google)
+        self.button2.pack(side=RIGHT)
+
+    def load_twitter(self):
+        self.button2.destroy()
+        self.button1.destroy()
+        self.frame_header.destroy()
+
+        # use `root` with another class
+        self.another = Twitter_Window(self.master)
+
+    def load_google(self):
+        self.button2.destroy()
+        self.button1.destroy()
+        self.frame_header.destroy()
+
+        # use `root` with another class
+        self.another = Google_Window(self.master)
 
 def main():    
     
     root = Tk()
-    run = Feedback(root)
+    run = Option_Window(root)
     root.mainloop()
     
 if __name__ == "__main__": main()
