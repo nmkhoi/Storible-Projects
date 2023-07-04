@@ -46,19 +46,16 @@ def scrape_google_new(query,no_of_records):
     
     search = driver.find_elements(by=By.TAG_NAME, value='textarea')[0]
     search.send_keys(str(query))
-    search.submit()
+    # search.submit()
     time.sleep(5)
 
-    nav = [div for div in driver.find_elements(by=By.TAG_NAME, value='div') if div.get_attribute('role') == 'navigation'][1]
-    try:
-        nav.find_element(by=By.LINK_TEXT, value='News')
-    except Exception as e:
-        nav.find_element(by=By.LINK_TEXT, value='Tin tức')
+    news = driver.find_element(by=By.LINK_TEXT, value='Tin tức')
+    news.click()
     time.sleep(5)
 
     final_data = pd.DataFrame(columns=['headline','link'])
     try:
-        for i in range(1,no_of_records):
+        for i in range(1,no_of_records+1):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(3)
             table = driver.find_element(by=By.TAG_NAME, value='table')
