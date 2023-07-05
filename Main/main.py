@@ -36,7 +36,22 @@ def scrolling():
     # Calculate new scroll height and compare with last scroll height
     new_height = driver.execute_script("return document.body.scrollHeight")
 
-def scrape_google_new(query,no_of_records):
+def scrape_google_new(query,no_of_records,time_query):
+
+    def time_setting(index):
+
+        tools = driver.find_element(by=By.XPATH, value='//*[@id="uddia_1"]/div')
+        tools.click()
+        time.sleep(3)
+
+        time_option = driver.find_element(by=By.XPATH, value='//*[@id="tn_1"]/span[2]/g-popup/div[1]/div')
+        time_option.click()
+        time.sleep(3)
+
+        menu = driver.find_element(by=By.XPATH, value='//*[@id="lb"]/div/g-menu')
+        item = menu.find_elements(by=By.TAG_NAME, value='g-menu-item')
+        item[int(index)].click()
+        time.sleep(5)
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     driver.set_page_load_timeout(20)
@@ -52,6 +67,19 @@ def scrape_google_new(query,no_of_records):
     news = driver.find_element(by=By.LINK_TEXT, value='Tin tức')
     news.click()
     time.sleep(5)
+
+    # dropdown = ['Anytime','Past hour','Past 24 hours','Past week','Past month','Past year']
+    if time_query == 'Past hour': # 1
+        time_setting(1)
+    elif time_query == 'Past 24 hours': # 2
+        time_setting(2)
+    elif time_query == 'Past week': # 3
+        time_setting(3)
+    elif time_query == 'Past month': # 4
+        time_setting(4)
+    elif time_query == 'Past year': # 5
+        time_setting(5)
+
 
     final_data = pd.DataFrame(columns=['headline','link'])
     try:
@@ -260,29 +288,39 @@ class Google_Window:
         self.frame_content = ttk.Frame(master)
         self.frame_content.pack()
 
+        dropdown = ['Anytime','Past hour','Past 24 hours','Past week','Past month','Past year']
+        self.variable = StringVar()
+        self.variable.set(dropdown[0])
+
         ttk.Label(self.frame_content, text = 'Number of Pages:').grid(row = 0, column = 0, padx = 5, sticky = 'sw')
         ttk.Label(self.frame_content, text = 'File Name:').grid(row = 0, column = 1, padx = 5, sticky = 'sw')
-        ttk.Label(self.frame_content, text = 'Query:').grid(row = 2, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Time:').grid(row = 2, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Query:').grid(row = 4, column = 0, padx = 5, sticky = 'sw')
         
         self.entry_records = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
         self.entry_filename = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.entry_time = ttk.OptionMenu(self.frame_content,self.variable,*dropdown)
         self.text_query = Text(self.frame_content, width = 50, height = 15, font = ('Arial', 10))
         
         self.entry_records.grid(row = 1, column = 0, padx = 5)
         self.entry_filename.grid(row = 1, column = 1, padx = 5)
-        self.text_query.grid(row = 3, column = 0, columnspan = 2, padx = 5)
+        self.entry_time.grid(row = 3, column = 0, padx = 5)
+        self.entry_time.config(width=24)
+        self.text_query.grid(row = 5, column = 0, columnspan = 2, padx = 5)
         
         ttk.Button(self.frame_content, text = 'Submit',
-                   command = self.submit).grid(row = 4, column = 0, padx = 5, pady = 5, sticky = 'e')
+                   command = self.submit).grid(row = 6, column = 0, padx = 5, pady = 5, sticky = 'e')
         ttk.Button(self.frame_content, text = 'Clear',
-                   command = self.clear).grid(row = 4, column = 1, padx = 5, pady = 5, sticky = 'w')
+                   command = self.clear).grid(row = 6, column = 1, padx = 5, pady = 5, sticky = 'w')
 
     def submit(self):
         no_of_records = int(self.entry_records.get())
         filename = self.entry_filename.get()
+        time_query = self.variable.get()
+        print(time_query)
         query = self.text_query.get(1.0,'end')
         self.clear()
-        df = scrape_google_new(query=query, no_of_records=no_of_records)
+        df = scrape_google_new(query=query, no_of_records=no_of_records, time_query=time_query)
         df.to_excel('{}.xlsx'.format(filename))
         # messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
     
