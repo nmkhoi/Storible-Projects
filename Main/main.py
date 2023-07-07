@@ -322,7 +322,7 @@ class Google_Window:
         self.clear()
         df = scrape_google_new(query=query, no_of_records=no_of_records, time_query=time_query)
         df.to_excel('{}.xlsx'.format(filename))
-        messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
+        # messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
     
     def clear(self):
         self.entry_records.delete(0, 'end')
