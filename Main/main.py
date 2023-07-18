@@ -53,7 +53,9 @@ def scrape_google_new(query,no_of_records,time_query):
         item[int(index)].click()
         time.sleep(5)
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    options = webdriver.ChromeOptions()
+    options.add_argument("--lang=vi")
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
     driver.set_page_load_timeout(20)
 
     driver.get('https://www.google.com.vn/')
@@ -83,7 +85,10 @@ def scrape_google_new(query,no_of_records,time_query):
 
     final_data = pd.DataFrame(columns=['headline','link'])
     try:
-        for i in range(1,no_of_records+1):
+        # for i in range(1,no_of_records+1):
+        i = 0
+        while len(final_data) <= no_of_records:
+            i += 1
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(3)
             table = driver.find_element(by=By.TAG_NAME, value='table')
@@ -102,7 +107,7 @@ def scrape_google_new(query,no_of_records,time_query):
                     }])])
     except Exception as e:
         pass
-    return final_data
+    return final_data.head(no_of_records)
 
 def scrape_tweet(query, no_of_tweets, email, password, username):
 
@@ -292,7 +297,7 @@ class Google_Window:
         self.variable = StringVar()
         self.variable.set(dropdown[0])
 
-        ttk.Label(self.frame_content, text = 'Number of Pages:').grid(row = 0, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Number of Records:').grid(row = 0, column = 0, padx = 5, sticky = 'sw')
         ttk.Label(self.frame_content, text = 'File Name:').grid(row = 0, column = 1, padx = 5, sticky = 'sw')
         ttk.Label(self.frame_content, text = 'Time:').grid(row = 2, column = 0, padx = 5, sticky = 'sw')
         ttk.Label(self.frame_content, text = 'Query:').grid(row = 4, column = 0, padx = 5, sticky = 'sw')
