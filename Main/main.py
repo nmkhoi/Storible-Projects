@@ -44,7 +44,7 @@ def scrape_google_new(query,no_of_records,time_query):
         tools.click()
         time.sleep(3)
 
-        time_option = driver.find_element(by=By.XPATH, value='//*[@id="tn_1"]/span[2]/g-popup/div[1]/div')
+        time_option = driver.find_element(by=By.XPATH, value='//*[@id="tn_1"]/span[1]/g-popup/div[1]/div')
         time_option.click()
         time.sleep(3)
 
@@ -183,7 +183,7 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
                     'mention_users':mention_users
                     }])])
                 time.sleep(2)
-                print(final_data)
+                # print(final_data)
             except Exception as e:
                 continue
         
@@ -322,7 +322,7 @@ class Google_Window:
         no_of_records = int(self.entry_records.get())
         filename = self.entry_filename.get()
         time_query = self.variable.get()
-        print(time_query)
+        # print(time_query)
         query = self.text_query.get(1.0,'end')
         self.clear()
         df = scrape_google_new(query=query, no_of_records=no_of_records, time_query=time_query)
