@@ -44,7 +44,9 @@ def scrape_google_new(query,no_of_records,time_query):
         tools.click()
         time.sleep(3)
 
-        time_option = driver.find_element(by=By.XPATH, value='//*[@id="tn_1"]/span[1]/g-popup/div[1]/div')
+        dropdown = driver.find_elements(by=By.CLASS_NAME, value='KTBKoe')
+        time_choice = [i for i in dropdown if i.text == 'Gần đây']
+        time_option = time_choice[0]
         time_option.click()
         time.sleep(3)
 
