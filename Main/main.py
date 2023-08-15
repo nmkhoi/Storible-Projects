@@ -36,7 +36,7 @@ def scrolling():
     # Calculate new scroll height and compare with last scroll height
     new_height = driver.execute_script("return document.body.scrollHeight")
 
-def scrape_google_new(query,no_of_records,time_query):
+def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
 
     def time_setting(index):
 
@@ -53,6 +53,15 @@ def scrape_google_new(query,no_of_records,time_query):
         menu = driver.find_element(by=By.XPATH, value='//*[@id="lb"]/div/g-menu')
         item = menu.find_elements(by=By.TAG_NAME, value='g-menu-item')
         item[int(index)].click()
+        if index == int(7):
+            start = driver.find_element(by=By.CLASS_NAME, value='OouJcb')
+            end = driver.find_element(by=By.CLASS_NAME, value='rzG2be')
+
+            start.send_keys(start_date)
+            end.send_keys(end_date)
+            find = driver.find_element(by=By.XPATH, value='//*[@id="T3kYXe"]/g-button')
+            time.sleep(2)
+            find.click()
         time.sleep(5)
 
     options = webdriver.ChromeOptions()
@@ -83,6 +92,8 @@ def scrape_google_new(query,no_of_records,time_query):
         time_setting(4)
     elif time_query == 'Past year': # 5
         time_setting(5)
+    elif time_query == 'Custom':
+        time_setting(7)
 
 
     final_data = pd.DataFrame(columns=['headline','link'])
@@ -290,35 +301,41 @@ class Google_Window:
         ttk.Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
         ttk.Label(self.frame_header, text = 'Social Media Scrapping', style = 'Header.TLabel').grid(row = 0, column = 1)
         ttk.Label(self.frame_header, wraplength = 300,
-                  text = ("Chỗ này sẽ note cái dì đó (User Manual chẳng hạn)")).grid(row = 1, column = 1)
+                  text = ("Điền Start và End nếu Time chọn Custom (định dạng ngày của thiết bị)")).grid(row = 1, column = 1)
         
         self.frame_content = ttk.Frame(master)
         self.frame_content.pack()
 
-        dropdown = ['Anytime','Past hour','Past 24 hours','Past week','Past month','Past year']
+        dropdown = ['Anytime','Past hour','Past 24 hours','Past week','Past month','Past year','Custom']
         self.variable = StringVar()
         self.variable.set(dropdown[0])
 
         ttk.Label(self.frame_content, text = 'Number of Records:').grid(row = 0, column = 0, padx = 5, sticky = 'sw')
         ttk.Label(self.frame_content, text = 'File Name:').grid(row = 0, column = 1, padx = 5, sticky = 'sw')
         ttk.Label(self.frame_content, text = 'Time:').grid(row = 2, column = 0, padx = 5, sticky = 'sw')
-        ttk.Label(self.frame_content, text = 'Query:').grid(row = 4, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Start:').grid(row = 4, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'End:').grid(row = 4, column = 1, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Query:').grid(row = 6, column = 0, padx = 5, sticky = 'sw')
         
         self.entry_records = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
         self.entry_filename = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
         self.entry_time = ttk.OptionMenu(self.frame_content,self.variable,*dropdown)
         self.text_query = Text(self.frame_content, width = 50, height = 15, font = ('Arial', 10))
+        self.entry_start = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.entry_end = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
         
         self.entry_records.grid(row = 1, column = 0, padx = 5)
         self.entry_filename.grid(row = 1, column = 1, padx = 5)
         self.entry_time.grid(row = 3, column = 0, padx = 5)
         self.entry_time.config(width=24)
-        self.text_query.grid(row = 5, column = 0, columnspan = 2, padx = 5)
+        self.entry_start.grid(row = 5, column = 0, padx = 5)
+        self.entry_end.grid(row = 5, column = 1, padx = 5)
+        self.text_query.grid(row = 7, column = 0, columnspan = 2, padx = 5)
         
         ttk.Button(self.frame_content, text = 'Submit',
-                   command = self.submit).grid(row = 6, column = 0, padx = 5, pady = 5, sticky = 'e')
+                   command = self.submit).grid(row = 8, column = 0, padx = 5, pady = 5, sticky = 'e')
         ttk.Button(self.frame_content, text = 'Clear',
-                   command = self.clear).grid(row = 6, column = 1, padx = 5, pady = 5, sticky = 'w')
+                   command = self.clear).grid(row = 8, column = 1, padx = 5, pady = 5, sticky = 'w')
 
     def submit(self):
         no_of_records = int(self.entry_records.get())
@@ -326,8 +343,10 @@ class Google_Window:
         time_query = self.variable.get()
         # print(time_query)
         query = self.text_query.get(1.0,'end')
+        start_date = self.entry_start.get()
+        end_date = self.entry_end.get()
         self.clear()
-        df = scrape_google_new(query=query, no_of_records=no_of_records, time_query=time_query)
+        df = scrape_google_new(query=query, no_of_records=no_of_records, time_query=time_query,start_date=start_date,end_date=end_date)
         df.to_excel('{}.xlsx'.format(filename))
         # messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
     
@@ -350,7 +369,7 @@ class Option_Window:
         Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
         Label(self.frame_header, text = 'Social Media Scrapping').grid(row = 0, column = 1)
         Label(self.frame_header, wraplength = 300,
-                  text = ("Chỗ này sẽ note cái dì đó (User Manual chẳng hạn)")).grid(row = 1, column = 1)
+                  text = ("Điền Start và End nếu Time chọn Custom (định dạng ngày của thiết bị)")).grid(row = 1, column = 1)
 
         self.button1 = Button(self.master, text="Twitter", command=self.load_twitter)
         self.button1.pack(side=LEFT)
