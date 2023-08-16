@@ -18,8 +18,8 @@ driver.set_page_load_timeout(20)
 driver.maximize_window()
 
 delay = 2
-seedlist_competitor = pd.read_excel('seedlist.xlsx','competitors')
-seedlist_client = pd.read_excel('seedlist.xlsx','clients')
+seedlist_competitor = pd.read_excel('../seedlist.xlsx','competitors')
+seedlist_client = pd.read_excel('../seedlist.xlsx','clients')
 today = date.today()
 
 
