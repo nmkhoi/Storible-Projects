@@ -96,7 +96,7 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
         time_setting(7)
 
 
-    final_data = pd.DataFrame(columns=['headline','link'])
+    final_data = pd.DataFrame(columns=['headline','link','Date'])
     try:
         # for i in range(1,no_of_records+1):
         i = 0
@@ -113,10 +113,12 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
             for link in links:
                 url = link.find_elements(by=By.TAG_NAME, value='a')[0].get_attribute('href')
                 headline = link.find_elements(by=By.TAG_NAME, value='div')[1].text.split('\n')[1].title()
+                date = link.find_elements(by=By.TAG_NAME, value='div')[10].text
 
                 final_data = pd.concat([final_data, pd.DataFrame.from_records([{
                     'headline':headline,
-                    'link':url
+                    'link':url,
+                    'Date':date
                     }])])
     except Exception as e:
         pass
