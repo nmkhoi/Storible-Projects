@@ -13,13 +13,13 @@ import pandas as pd
 from time import sleep
 from datetime import date
 
-driver = webdriver.Chrome(executable_path=ChromeDriverManager(version="116.0.5845.96").install())
+driver = webdriver.Chrome(executable_path='chromedriver-win64\chromedriver.exe')
 driver.set_page_load_timeout(20)
 driver.maximize_window()
 
 delay = 2
-seedlist_competitor = pd.read_excel('../seedlist.xlsx','competitors')
-seedlist_client = pd.read_excel('../seedlist.xlsx','clients')
+seedlist_competitor = pd.read_excel('Storible-Campaigns/seedlist.xlsx','competitors')
+seedlist_client = pd.read_excel('Storible-Campaigns/seedlist.xlsx','clients')
 today = date.today()
 
 

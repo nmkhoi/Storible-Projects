@@ -66,7 +66,7 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
 
     options = webdriver.ChromeOptions()
     options.add_argument("--lang=vi")
-    driver = webdriver.Chrome(executable_path=ChromeDriverManager(version="114.0.5735.16").install(),options=options)
+    driver = webdriver.Chrome(executable_path='chromedriver-win64\chromedriver.exe',options=options)
     driver.set_page_load_timeout(20)
 
     driver.get('https://www.google.com.vn/')
