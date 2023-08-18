@@ -13,7 +13,7 @@ import pandas as pd
 from time import sleep
 from datetime import date
 
-driver = webdriver.Chrome(executable_path=ChromeDriverManager(version="114.0.5735.16").install())
+driver = webdriver.Chrome(executable_path=ChromeDriverManager(version="116.0.5845.96").install())
 driver.set_page_load_timeout(20)
 driver.maximize_window()
 
