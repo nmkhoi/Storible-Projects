@@ -128,7 +128,7 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
 
     global driver
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    driver = webdriver.Chrome(executable_path='chromedriver-win64\chromedriver.exe')
     driver.set_page_load_timeout(20)
     driver.maximize_window()
 
