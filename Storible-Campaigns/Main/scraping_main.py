@@ -396,14 +396,14 @@ def budgetdirect():
                     pr_camps = {names[i]: links[i] for i in range(len(links))}
                     print("budgetdirect's total campaigns are: {}".format(len(pr_camps)))
                     df = pd.DataFrame(list(pr_camps.items()),columns=['Name','Link'])
+                    df['Source'] = 'https://www.budgetdirect.com.au/'
+                    df['Published Date'] = 'unavailable'
+                    df['Link'] = '[]'
+                    df['Link'] = df['Link'].map(lambda x: str(x).replace('[',''))
+                    df['Link'] = df['Link'].map(lambda x: str(x).replace(']',''))
+                    df['Link'] = df['Link'].map(lambda x: str(x).replace("'",''))
             except Exception as e:
                 continue
-    df['Source'] = 'https://www.budgetdirect.com.au/'
-    df['Published Date'] = 'unavailable'
-    df['Link'] = '[]'
-    df['Link'] = df['Link'].map(lambda x: str(x).replace('[',''))
-    df['Link'] = df['Link'].map(lambda x: str(x).replace(']',''))
-    df['Link'] = df['Link'].map(lambda x: str(x).replace("'",''))
     return df
 
 #businessbacker
