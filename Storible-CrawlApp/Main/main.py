@@ -100,7 +100,7 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
     try:
         # for i in range(1,no_of_records+1):
         i = 0
-        while len(final_data) <= no_of_records:
+        while len(final_data) <= int(no_of_records):
             i += 1
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(3)
@@ -113,12 +113,10 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
             for link in links:
                 url = link.find_elements(by=By.TAG_NAME, value='a')[0].get_attribute('href')
                 headline = link.find_elements(by=By.TAG_NAME, value='div')[1].text.split('\n')[1].title()
-                date = link.find_elements(by=By.TAG_NAME, value='div')[10].text
 
                 final_data = pd.concat([final_data, pd.DataFrame.from_records([{
                     'headline':headline,
-                    'link':url,
-                    'Date':date
+                    'link':url
                     }])])
     except Exception as e:
         pass
@@ -299,7 +297,7 @@ class Google_Window:
         self.frame_header = ttk.Frame(master)
         self.frame_header.pack()
         
-        self.logo = PhotoImage(file = 'logo.png',master=master)
+        self.logo = PhotoImage(file = 'Storible-CrawlApp/logo.png',master=master)
         ttk.Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
         ttk.Label(self.frame_header, text = 'Social Media Scrapping', style = 'Header.TLabel').grid(row = 0, column = 1)
         ttk.Label(self.frame_header, wraplength = 300,
@@ -367,7 +365,7 @@ class Option_Window:
         self.frame_header = Frame(master)
         self.frame_header.pack()
 
-        self.logo = PhotoImage(file = 'logo.png',master=master)
+        self.logo = PhotoImage(file = 'Storible-CrawlApp/logo.png',master=master)
         Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
         Label(self.frame_header, text = 'Social Media Scrapping').grid(row = 0, column = 1)
         Label(self.frame_header, wraplength = 300,
