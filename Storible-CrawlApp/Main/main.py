@@ -39,8 +39,9 @@ def scrolling():
 def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
 
     def time_setting(index):
-
-        tools = driver.find_element(by=By.XPATH, value='//*[@id="uddia_1"]/div')
+        
+        banner = driver.find_element(by=By.CLASS_NAME, value='IC1Ck')
+        tools = banner.find_element(by=By.CLASS_NAME, value='t2vtad')
         tools.click()
         time.sleep(3)
 
