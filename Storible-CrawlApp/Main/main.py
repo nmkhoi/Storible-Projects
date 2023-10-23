@@ -39,7 +39,7 @@ def scrolling():
 def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
 
     def time_setting(index):
-        
+
         banner = driver.find_element(by=By.CLASS_NAME, value='IC1Ck')
         tools = banner.find_element(by=By.CLASS_NAME, value='t2vtad')
         tools.click()
@@ -65,9 +65,10 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
             find.click()
         time.sleep(5)
 
+    service = Service(executable_path='chromedriver-win64\chromedriver.exe')
     options = webdriver.ChromeOptions()
     options.add_argument("--lang=vi")
-    driver = webdriver.Chrome(executable_path='chromedriver-win64\chromedriver.exe',options=options)
+    driver = webdriver.Chrome(service=service,options=options)
     driver.set_page_load_timeout(20)
 
     driver.get('https://www.google.com.vn/')
@@ -129,7 +130,8 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
 
     global driver
 
-    driver = webdriver.Chrome(executable_path='chromedriver-win64\chromedriver.exe')
+    service = Service(executable_path='chromedriver-win64\chromedriver.exe')
+    driver = webdriver.Chrome(service=service)
     driver.set_page_load_timeout(20)
     driver.maximize_window()
 
