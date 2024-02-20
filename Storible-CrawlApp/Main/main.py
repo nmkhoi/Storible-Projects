@@ -40,8 +40,8 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
 
     def time_setting(index):
 
-        banner = driver.find_element(by=By.CLASS_NAME, value='IC1Ck')
-        tools = banner.find_element(by=By.CLASS_NAME, value='t2vtad')
+        banner = driver.find_element(by=By.CLASS_NAME, value='xhjkHe') #Here
+        tools = banner.find_element(by=By.CLASS_NAME, value='nfSF8e')
         tools.click()
         time.sleep(3)
 
@@ -175,6 +175,7 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
 
     final_data = pd.DataFrame(columns=['username','text','date','hashtag','external_links','reply_count','retweet_count','like_count','mention_users'])
     while len(final_data) <= no_of_tweets:
+        old_length = len(final_data)
         articles = driver.find_elements(by=By.TAG_NAME, value='article')
         for article in articles:
             try:
@@ -208,6 +209,9 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
         # final_data.loc[final_data.astype(str).drop_duplicates().index]
         scrolling()
         time.sleep(5)
+
+        if len(final_data) == old_length:
+            break
     driver.quit()
     return final_data.head(no_of_tweets)
 
@@ -223,17 +227,17 @@ class Twitter_Window:
         self.style.configure('TFrame', background = '#e1d8b9')
         self.style.configure('TButton', background = '#e1d8b9')
         self.style.configure('TLabel', background = '#e1d8b9', font = ('Arial', 11))
-        self.style.configure('Header.TLabel', font = ('Arial', 18, 'bold'))      
+        self.style.configure('Header.TLabel', font = ('Arial', 18, 'bold'))
 
         self.frame_header = ttk.Frame(master)
         self.frame_header.pack()
         
-        self.logo = PhotoImage(file = 'logo.png')
+        self.logo = PhotoImage(file = 'Storible-CrawlApp/logo.png')
         ttk.Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
         ttk.Label(self.frame_header, text = 'Social Media Scrapping', style = 'Header.TLabel').grid(row = 0, column = 1)
         ttk.Label(self.frame_header, wraplength = 300,
-                  text = ("Chỗ này sẽ note cái dì đó (User Manual chẳng hạn)")).grid(row = 1, column = 1)
-        
+                  text = ("nmkhoi.iac@gmail.com / jakejills88591 / Storible456")).grid(row = 1, column = 1)
+
         self.frame_content = ttk.Frame(master)
         self.frame_content.pack()
 
@@ -271,7 +275,7 @@ class Twitter_Window:
         username = self.entry_username.get()
         query = self.text_query.get(1.0,'end')
         self.clear()
-        df = scrape_tweet(query=query, no_of_tweets=no_of_tweets, filename=filename, email=email, password=password, username=username)
+        df = scrape_tweet(query=query, no_of_tweets=no_of_tweets, email=email, password=password, username=username)
         df.to_excel('{}.xlsx'.format(filename))
         # messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
     
