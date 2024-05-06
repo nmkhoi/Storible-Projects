@@ -126,6 +126,92 @@ def scrape_google_new(query,no_of_records,time_query,start_date,end_date):
         pass
     return final_data.head(no_of_records)
 
+def scrape_google(query,no_of_records,time_query,start_date,end_date):
+
+    def time_setting(index):
+
+        banner = driver.find_element(by=By.CLASS_NAME, value='xhjkHe') #Here
+        tools = banner.find_element(by=By.CLASS_NAME, value='nfSF8e')
+        tools.click()
+        time.sleep(3)
+
+        dropdown = driver.find_elements(by=By.CLASS_NAME, value='KTBKoe')
+        time_choice = [i for i in dropdown if i.text == 'Gần đây']
+        time_option = time_choice[0]
+        time_option.click()
+        time.sleep(3)
+
+        menu = driver.find_element(by=By.XPATH, value='//*[@id="lb"]/div/g-menu')
+        item = menu.find_elements(by=By.TAG_NAME, value='g-menu-item')
+        item[int(index)].click()
+        if index == int(7):
+            start = driver.find_element(by=By.CLASS_NAME, value='OouJcb')
+            end = driver.find_element(by=By.CLASS_NAME, value='rzG2be')
+
+            start.send_keys(start_date)
+            end.send_keys(end_date)
+            find = driver.find_element(by=By.XPATH, value='//*[@id="T3kYXe"]/g-button')
+            time.sleep(2)
+            find.click()
+        time.sleep(5)
+
+    service = Service(executable_path='chromedriver-win64\chromedriver.exe')
+    options = webdriver.ChromeOptions()
+    options.add_argument("--lang=vi")
+    driver = webdriver.Chrome(service=service,options=options)
+    driver.set_page_load_timeout(20)
+
+    driver.get('https://www.google.com.vn/')
+    time.sleep(5)
+    
+    search = driver.find_elements(by=By.TAG_NAME, value='textarea')[0]
+    search.send_keys(str(query))
+    # search.submit()
+    time.sleep(5)
+
+    # dropdown = ['Anytime','Past hour','Past 24 hours','Past week','Past month','Past year']
+    if time_query == 'Past hour': # 1
+        time_setting(1)
+    elif time_query == 'Past 24 hours': # 2
+        time_setting(2)
+    elif time_query == 'Past week': # 3
+        time_setting(3)
+    elif time_query == 'Past month': # 4
+        time_setting(4)
+    elif time_query == 'Past year': # 5
+        time_setting(5)
+    elif time_query == 'Custom':
+        time_setting(7)
+
+
+    final_data = pd.DataFrame(columns=['headline','link'])
+    try:
+        # for i in range(1,no_of_records+1):
+        i = 0
+        while len(final_data) <= int(no_of_records):
+            # i += 1
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # time.sleep(3)
+            # table = driver.find_element(by=By.TAG_NAME, value='table')
+            # page = table.find_elements(by=By.TAG_NAME, value='td')
+            # page[i].click()
+            time.sleep(3)
+
+            links = driver.find_elements(by=By.CLASS_NAME, value='yuRUbf')
+            for link in links:
+                url = link.find_elements(by=By.TAG_NAME, value='a')[0].get_attribute('href')
+                headline = link.find_element(by=By.TAG_NAME, value='h3').text
+                # date = link.find_elements(by=By.TAG_NAME, value='div')[1].text.split('\n')[4]
+
+                final_data = pd.concat([final_data, pd.DataFrame.from_records([{
+                    'headline':headline,
+                    'link':url
+                    }])])
+    except Exception as e:
+        pass
+    return final_data.head(no_of_records)
+
+
 def scrape_tweet(query, no_of_tweets, email, password, username):
 
     global driver
@@ -286,7 +372,7 @@ class Twitter_Window:
         self.entry_password.delete(0, 'end')
         self.entry_username.delete(0, 'end')
 
-class Google_Window:
+class Google_News_Window:
 
     def __init__(self, master):
 
@@ -363,6 +449,85 @@ class Google_Window:
         self.entry_filename.delete(0, 'end')
         self.text_query.delete(1.0, 'end')
 
+class Google_Window:
+
+    def __init__(self, master):
+
+        # keep `root` in `self.master`
+        
+        master.title('Scrapper')
+        master.resizable(False, False)
+        master.configure(background = '#e1d8b9')
+        
+        self.style = ttk.Style()
+        self.style.configure('TFrame', background = '#e1d8b9')
+        self.style.configure('TButton', background = '#e1d8b9')
+        self.style.configure('TLabel', background = '#e1d8b9', font = ('Arial', 11))
+        self.style.configure('Header.TLabel', font = ('Arial', 18, 'bold'))      
+
+        self.frame_header = ttk.Frame(master)
+        self.frame_header.pack()
+        
+        self.logo = PhotoImage(file = 'Storible-CrawlApp/logo.png',master=master)
+        ttk.Label(self.frame_header, image = self.logo).grid(row = 0, column = 0, rowspan = 2)
+        ttk.Label(self.frame_header, text = 'Social Media Scrapping', style = 'Header.TLabel').grid(row = 0, column = 1)
+        ttk.Label(self.frame_header, wraplength = 300,
+                  text = ("Điền Start và End nếu Time chọn Custom (định dạng ngày của thiết bị)")).grid(row = 1, column = 1)
+        
+        self.frame_content = ttk.Frame(master)
+        self.frame_content.pack()
+
+        dropdown = ['Anytime','Past hour','Past 24 hours','Past week','Past month','Past year','Custom']
+        self.variable = StringVar()
+        self.variable.set(dropdown[0])
+
+        ttk.Label(self.frame_content, text = 'Number of Records:').grid(row = 0, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'File Name:').grid(row = 0, column = 1, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Time:').grid(row = 2, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Start:').grid(row = 4, column = 0, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'End:').grid(row = 4, column = 1, padx = 5, sticky = 'sw')
+        ttk.Label(self.frame_content, text = 'Query:').grid(row = 6, column = 0, padx = 5, sticky = 'sw')
+        
+        self.entry_records = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.entry_filename = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.entry_time = ttk.OptionMenu(self.frame_content,self.variable,*dropdown)
+        self.text_query = Text(self.frame_content, width = 50, height = 15, font = ('Arial', 10))
+        self.entry_start = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        self.entry_end = ttk.Entry(self.frame_content, width = 24, font = ('Arial', 10))
+        
+        self.entry_records.grid(row = 1, column = 0, padx = 5)
+        self.entry_filename.grid(row = 1, column = 1, padx = 5)
+        self.entry_time.grid(row = 3, column = 0, padx = 5)
+        self.entry_time.config(width=24)
+        self.entry_start.grid(row = 5, column = 0, padx = 5)
+        self.entry_end.grid(row = 5, column = 1, padx = 5)
+        self.text_query.grid(row = 7, column = 0, columnspan = 2, padx = 5)
+        
+        ttk.Button(self.frame_content, text = 'Submit',
+                   command = self.submit).grid(row = 8, column = 0, padx = 5, pady = 5, sticky = 'e')
+        ttk.Button(self.frame_content, text = 'Clear',
+                   command = self.clear).grid(row = 8, column = 1, padx = 5, pady = 5, sticky = 'w')
+
+    def submit(self):
+        no_of_records = int(self.entry_records.get())
+        filename = self.entry_filename.get()
+        time_query = self.variable.get()
+        # print(time_query)
+        query = self.text_query.get(1.0,'end')
+        start_date = self.entry_start.get()
+        end_date = self.entry_end.get()
+        self.clear()
+        df = scrape_google(query=query, no_of_records=no_of_records, time_query=time_query,start_date=start_date,end_date=end_date)
+        df.to_excel('{}.xlsx'.format(filename))
+        # messagebox.showinfo(title = 'Explore California Feedback', message = 'Comments Submitted!')
+    
+    def clear(self):
+        self.entry_records.delete(0, 'end')
+        self.entry_filename.delete(0, 'end')
+        self.text_query.delete(1.0, 'end')
+
+
+
 class Option_Window:
 
     def __init__(self, master):
@@ -382,8 +547,11 @@ class Option_Window:
         self.button1 = Button(self.master, text="Twitter", command=self.load_twitter)
         self.button1.pack(side=LEFT)
 
-        self.button2 = Button(self.master, text="Google News", command=self.load_google)
-        self.button2.pack(side=RIGHT)
+        self.button2 = Button(self.master, text="Google News", command=self.load_google_new)
+        self.button2.pack(side=LEFT)
+
+        self.button3 = Button(self.master, text="Google", command=self.load_google)
+        self.button3.pack(side=LEFT)
 
     def load_twitter(self):
         self.button2.destroy()
@@ -393,15 +561,25 @@ class Option_Window:
         # use `root` with another class
         self.another = Twitter_Window(self.master)
 
+    def load_google_new(self):
+        self.button2.destroy()
+        self.button1.destroy()
+        self.button3.destroy()
+        self.frame_header.destroy()
+
+        # use `root` with another class
+        self.another = Google_News_Window(self.master)
+    
     def load_google(self):
         self.button2.destroy()
         self.button1.destroy()
+        self.button3.destroy()
         self.frame_header.destroy()
 
         # use `root` with another class
         self.another = Google_Window(self.master)
 
-def main():    
+def main():
     
     root = Tk()
     run = Option_Window(root)
