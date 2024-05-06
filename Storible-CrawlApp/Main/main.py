@@ -149,7 +149,6 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
     username_holder = driver.find_element(by=By.TAG_NAME, value='input') 
     username_holder.send_keys(username)
     time.sleep(3)
-
     next_button = driver.find_element(by=By.XPATH, value='//*[@id="layers"]/div/div/div/div/div/div/div[2]/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div/div')
     next_button.click()
     time.sleep(3)
@@ -158,7 +157,7 @@ def scrape_tweet(query, no_of_tweets, email, password, username):
     password_holder.send_keys(password)
     time.sleep(3)
 
-    login_button = driver.find_element(by=By.XPATH, value='//*[@id="layers"]/div/div/div/div/div/div/div[2]/div[2]/div/div/div[2]/div[2]/div[2]/div/div[1]/div/div/div/div/span')
+    login_button = driver.find_element(by=By.XPAT. H, value='//*[@id="layers"]/div/div/div/div/div/div/div[2]/div[2]/div/div/div[2]/div[2]/div[2]/div/div[1]/div/div/div/div/span')
     login_button.click()
     time.sleep(5)
 
